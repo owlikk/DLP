@@ -1,1 +1,47 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #2b0a3d, #5b21b6);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
 
+.auth-container {
+  width: 350px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.logo {
+  width: 140px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #6d28d9;
+}
