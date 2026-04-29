@@ -3,7 +3,7 @@ const loginBtn = document.getElementById("loginBtn");
 const message = document.getElementById("message");
 
 registerBtn.addEventListener("click", async () => {
-  message.textContent = "Выполняется регистрация...";
+  message.textContent = "Регистрация...";
 
   const fullName = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -14,37 +14,42 @@ registerBtn.addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password
-  });
+  try {
+    const { data, error } = await db.auth.signUp({
+      email: email,
+      password: password
+    });
 
-  if (error) {
-    message.textContent = "Ошибка регистрации: " + error.message;
-    return;
-  }
-
-  if (data.user) {
-    const { error: profileError } = await supabaseClient
-      .from("profiles")
-      .insert({
-        id: data.user.id,
-        email: email,
-        full_name: fullName,
-        role: "employee"
-      });
-
-    if (profileError) {
-      message.textContent = "Пользователь создан, но профиль не сохранён: " + profileError.message;
+    if (error) {
+      message.textContent = "Ошибка регистрации: " + error.message;
       return;
     }
-  }
 
-  message.textContent = "Регистрация выполнена. Теперь нажмите «Войти».";
+    if (data.user) {
+      const { error: profileError } = await db
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          email: email,
+          full_name: fullName,
+          role: "employee"
+        });
+
+      if (profileError) {
+        message.textContent = "Пользователь создан, но профиль не сохранён.";
+        return;
+      }
+    }
+
+    message.textContent = "Регистрация успешна. Теперь нажмите «Войти».";
+
+  } catch (e) {
+    message.textContent = "Ошибка: " + e.message;
+  }
 });
 
 loginBtn.addEventListener("click", async () => {
-  message.textContent = "Выполняется вход...";
+  message.textContent = "Вход...";
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -54,15 +59,20 @@ loginBtn.addEventListener("click", async () => {
     return;
   }
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+  try {
+    const { error } = await db.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
 
-  if (error) {
-    message.textContent = "Ошибка входа: " + error.message;
-    return;
+    if (error) {
+      message.textContent = "Ошибка входа: " + error.message;
+      return;
+    }
+
+    window.location.href = "dashboard.html";
+
+  } catch (e) {
+    message.textContent = "Ошибка: " + e.message;
   }
-
-  window.location.href = "dashboard.html";
 });
