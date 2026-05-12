@@ -7,6 +7,47 @@ const riskLevel = document.getElementById("riskLevel");
 const riskScore = document.getElementById("riskScore");
 const foundItems = document.getElementById("foundItems");
 
+async function getRules() {
+  const { data } = await db
+    .from("rules")
+    .select("*")
+    .eq("is_active", true);
+
+  return data || [];
+}
+
+async function saveLog(text, result, type) {
+  const {
+    data: { user }
+  } = await db.auth.getUser();
+
+  if (!user) return;
+
+  await db.from("check_logs").insert({
+    user_id: user.id,
+    check_type: type,
+    input_text: text,
+    masked_text: text,
+    risk_level: result.risk,
+    risk_score: result.score,
+    found_items: result.findings
+  });
+}
+
+function renderResult(result) {
+  riskLevel.textContent = "Риск: " + result.risk;
+  riskScore.textContent = "Оценка: " + result.score;
+
+  if (!result.findings.length) {
+    foundItems.innerHTML = "<p>Угроз не обнаружено.</p>";
+    return;
+  }
+
+  foundItems.innerHTML = result.findings
+    .map(item => `<p>• ${item}</p>`)
+    .join("");
+}
+
 analyzeBtn.addEventListener("click", async () => {
   const text = messageInput.value.trim();
 
@@ -15,29 +56,25 @@ analyzeBtn.addEventListener("click", async () => {
     return;
   }
 
-  const result = analyzeText(text);
+  const rules = await getRules();
+  const result = analyzeText(text, rules);
 
-  riskLevel.textContent = "Риск: " + result.risk;
-  riskScore.textContent = "Оценка: " + result.score;
-
-  foundItems.innerHTML = result.findings
-    .map(item => `<p>• ${item}</p>`)
-    .join("");
+  renderResult(result);
+  await saveLog(text, result, "text");
 });
 
 clipboardBtn.addEventListener("click", async () => {
   try {
     const text = await navigator.clipboard.readText();
+
     messageInput.value = text;
 
-    const result = analyzeText(text);
+    const rules = await getRules();
+    const result = analyzeText(text, rules);
 
-    riskLevel.textContent = "Риск: " + result.risk;
-    riskScore.textContent = "Оценка: " + result.score;
+    renderResult(result);
+    await saveLog(text, result, "clipboard");
 
-    foundItems.innerHTML = result.findings
-      .map(item => `<p>• ${item}</p>`)
-      .join("");
   } catch {
     alert("Нет доступа к буферу обмена.");
   }
