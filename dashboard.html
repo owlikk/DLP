@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OWL DLP — Панель анализа</title>
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
@@ -13,28 +13,47 @@
 
       <div class="top-bar">
         <img src="assets/logo.png" class="dashboard-logo" alt="OWL DLP">
+
         <div>
           <h1>OWL DLP</h1>
-          <p>Анализ сообщений и контроль утечки данных</p>
+          <p>Анализ сообщений и контроль утечки конфиденциальных данных</p>
         </div>
       </div>
 
       <textarea
         id="messageInput"
-        placeholder="Вставьте текст письма или сообщения для проверки..."
+        placeholder="Вставьте текст письма, сообщения или данные для проверки..."
       ></textarea>
 
       <div class="dashboard-buttons">
         <button id="analyzeBtn">Проверить текст</button>
-        <button id="clipboardBtn" class="secondary-btn">Проверить буфер обмена</button>
-        <button id="logoutBtn" class="secondary-btn">Выйти</button>
+
+        <button id="clipboardBtn" class="secondary-btn">
+          Проверить буфер обмена
+        </button>
+
+        <button onclick="window.location.href='education.html'" class="secondary-btn">
+          Обучение
+        </button>
+
+        <button onclick="window.location.href='admin.html'" class="secondary-btn">
+          Админ-панель
+        </button>
+
+        <button id="logoutBtn" class="secondary-btn">
+          Выйти
+        </button>
       </div>
 
       <div class="result-box">
         <h3>Результат анализа</h3>
+
         <p id="riskLevel">Риск: —</p>
         <p id="riskScore">Оценка: —</p>
-        <div id="foundItems"></div>
+
+        <div id="foundItems">
+          <p>Результаты проверки будут отображаться здесь.</p>
+        </div>
       </div>
 
     </div>
@@ -44,5 +63,6 @@
   <script src="js/config.js"></script>
   <script src="js/analyzer.js"></script>
   <script src="js/dashboard.js"></script>
+
 </body>
 </html>
