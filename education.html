@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OWL DLP — Обучение</title>
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
 
+  <main class="dashboard-page">
+    <div class="dashboard-card">
+
+      <div class="top-bar">
+        <img src="assets/logo.png" class="dashboard-logo" alt="OWL DLP">
+        <div>
+          <h1>Обучение сотрудников</h1>
+          <p>Основы безопасной работы с электронной почтой и социальными сетями</p>
+        </div>
+      </div>
+
+      <div class="result-box">
+        <h3>Правила безопасности</h3>
+        <p>• Не передавайте пароли через электронную почту и социальные сети.</p>
+        <p>• Не переходите по подозрительным ссылкам.</p>
+        <p>• Проверяйте отправителя письма.</p>
+        <p>• Не публикуйте конфиденциальные данные предприятия.</p>
+      </div>
+
+      <div class="result-box" style="margin-top:20px;">
+        <h3>Мини-тест</h3>
+        <p>Можно ли отправлять пароль коллеге через Telegram?</p>
+
+        <button onclick="submitTest(false)">Да</button>
+        <button onclick="submitTest(true)">Нет</button>
+
+        <p id="testResult"></p>
+      </div>
+
+      <div class="dashboard-buttons" style="margin-top:20px;">
+        <button onclick="window.location.href='dashboard.html'">Назад</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/education.js"></script>
+</body>
+</html>
