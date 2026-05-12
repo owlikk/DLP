@@ -1,1 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OWL DLP — Админ-панель</title>
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
 
+  <main class="dashboard-page">
+    <div class="dashboard-card">
+
+      <div class="top-bar">
+        <img src="assets/logo.png" class="dashboard-logo" alt="OWL DLP">
+        <div>
+          <h1>Админ-панель</h1>
+          <p>Журнал проверок и управление правилами</p>
+        </div>
+      </div>
+
+      <div class="result-box">
+        <h3>Добавить запрещённое слово</h3>
+        <input type="text" id="ruleInput" placeholder="Например: пароль">
+        <button id="addRuleBtn">Добавить</button>
+      </div>
+
+      <div class="result-box" style="margin-top:20px;">
+        <h3>Журнал проверок</h3>
+        <div id="logsContainer">Загрузка...</div>
+      </div>
+
+      <div class="dashboard-buttons" style="margin-top:20px;">
+        <button onclick="window.location.href='dashboard.html'">Назад</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
