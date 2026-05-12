@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OWL DLP — Панель анализа</title>
+  <link rel="stylesheet" href="css/style.css?v=5">
+</head>
+<body>
 
+  <main class="dashboard-page">
+    <div class="dashboard-card">
+
+      <div class="top-bar">
+        <img src="assets/logo.png" class="dashboard-logo" alt="OWL DLP">
+        <div>
+          <h1>OWL DLP</h1>
+          <p>Анализ сообщений и контроль утечки данных</p>
+        </div>
+      </div>
+
+      <textarea
+        id="messageInput"
+        placeholder="Вставьте текст письма или сообщения для проверки..."
+      ></textarea>
+
+      <div class="dashboard-buttons">
+        <button id="analyzeBtn">Проверить текст</button>
+        <button id="clipboardBtn" class="secondary-btn">Проверить буфер обмена</button>
+        <button id="logoutBtn" class="secondary-btn">Выйти</button>
+      </div>
+
+      <div class="result-box">
+        <h3>Результат анализа</h3>
+        <p id="riskLevel">Риск: —</p>
+        <p id="riskScore">Оценка: —</p>
+        <div id="foundItems"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
