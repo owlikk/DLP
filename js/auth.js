@@ -1,78 +1,79 @@
+const fullNameInput = document.getElementById("fullName");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 const registerBtn = document.getElementById("registerBtn");
 const loginBtn = document.getElementById("loginBtn");
 const message = document.getElementById("message");
 
 registerBtn.addEventListener("click", async () => {
-  message.textContent = "Регистрация...";
-
-  const fullName = document.getElementById("fullName").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const fullName = fullNameInput.value.trim();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if (!fullName || !email || !password) {
     message.textContent = "Заполните все поля.";
     return;
   }
 
-  try {
-    const { data, error } = await db.auth.signUp({
+  const { data, error } = await db.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    message.textContent = "Ошибка регистрации: " + error.message;
+    return;
+  }
+
+  if (data.user) {
+    await db.from("profiles").insert({
+      id: data.user.id,
+      full_name: fullName,
       email: email,
-      password: password
+      role: "employee"
     });
 
-    if (error) {
-      message.textContent = "Ошибка регистрации: " + error.message;
-      return;
-    }
-
-    if (data.user) {
-      const { error: profileError } = await db
-        .from("profiles")
-        .insert({
-          id: data.user.id,
-          email: email,
-          full_name: fullName,
-          role: "employee"
-        });
-
-      if (profileError) {
-        message.textContent = "Пользователь создан, но профиль не сохранён.";
-        return;
-      }
-    }
-
-    message.textContent = "Регистрация успешна. Теперь нажмите «Войти».";
-
-  } catch (e) {
-    message.textContent = "Ошибка: " + e.message;
+    message.textContent = "Регистрация успешна.";
   }
 });
 
 loginBtn.addEventListener("click", async () => {
-  message.textContent = "Вход...";
+  const fullName = fullNameInput.value.trim();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    message.textContent = "Введите email и пароль.";
+  if (!fullName || !email || !password) {
+    message.textContent = "Заполните все поля.";
     return;
   }
 
-  try {
-    const { error } = await db.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
+  const { data, error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    if (error) {
-      message.textContent = "Ошибка входа: " + error.message;
-      return;
-    }
-
-    window.location.href = "dashboard.html";
-
-  } catch (e) {
-    message.textContent = "Ошибка: " + e.message;
+  if (error) {
+    message.textContent = "Ошибка входа: неверный email или пароль.";
+    return;
   }
+
+  const { data: profile } = await db
+    .from("profiles")
+    .select("*")
+    .eq("id", data.user.id)
+    .single();
+
+  if (!profile) {
+    await db.auth.signOut();
+    message.textContent = "Профиль пользователя не найден.";
+    return;
+  }
+
+  if (profile.full_name.trim().toLowerCase() !== fullName.toLowerCase()) {
+    await db.auth.signOut();
+    message.textContent = "Неверное ФИО.";
+    return;
+  }
+
+  window.location.href = "dashboard.html";
 });
