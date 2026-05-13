@@ -15,6 +15,8 @@ registerBtn.addEventListener("click", async () => {
     return;
   }
 
+  message.textContent = "Регистрация...";
+
   const { data, error } = await db.auth.signUp({
     email,
     password
@@ -25,31 +27,36 @@ registerBtn.addEventListener("click", async () => {
     return;
   }
 
-  if (data.user) {
-    const { error: profileError } = await db.from("profiles").insert({
+  if (!data.user) {
+    message.textContent = "Ошибка создания пользователя.";
+    return;
+  }
+
+  const { error: profileError } = await db
+    .from("profiles")
+    .upsert({
       id: data.user.id,
       full_name: fullName,
       email: email,
       role: "employee"
     });
 
-    if (profileError) {
-      message.textContent = "Ошибка создания профиля.";
-      return;
-    }
-
-    alert(
-  "Регистрация выполнена.\n\n" +
-  "Для завершения регистрации необходимо подтвердить адрес электронной почты.\n" +
-  "Письмо с подтверждением отправлено на вашу почту.\n\n" +
-  "После подтверждения email вы сможете войти в систему."
-);
-
-fullNameInput.value = "";
-emailInput.value = "";
-passwordInput.value = "";
-message.textContent = "";
+  if (profileError) {
+    message.textContent = "Ошибка создания профиля.";
+    return;
   }
+
+  alert(
+    "Регистрация выполнена.\n\n" +
+    "Для завершения регистрации необходимо подтвердить адрес электронной почты.\n" +
+    "Письмо с подтверждением отправлено на вашу почту.\n\n" +
+    "После подтверждения email вы сможете войти в систему."
+  );
+
+  fullNameInput.value = "";
+  emailInput.value = "";
+  passwordInput.value = "";
+  message.textContent = "";
 });
 
 loginBtn.addEventListener("click", async () => {
@@ -62,6 +69,8 @@ loginBtn.addEventListener("click", async () => {
     return;
   }
 
+  message.textContent = "Проверка данных...";
+
   const { data: profile, error: profileError } = await db
     .from("profiles")
     .select("*")
@@ -73,7 +82,7 @@ loginBtn.addEventListener("click", async () => {
     return;
   }
 
-  if (profile.full_name.trim().toLowerCase() !== fullName.trim().toLowerCase()) {
+  if (profile.full_name.trim().toLowerCase() !== fullName.toLowerCase()) {
     message.textContent = "Неверное ФИО.";
     return;
   }
@@ -84,6 +93,11 @@ loginBtn.addEventListener("click", async () => {
   });
 
   if (error) {
+    if (error.message.toLowerCase().includes("email not confirmed")) {
+      message.textContent = "Подтвердите email перед входом.";
+      return;
+    }
+
     message.textContent = "Неверный email или пароль.";
     return;
   }
