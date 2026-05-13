@@ -5,19 +5,30 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 const messageInput = document.getElementById("messageInput");
 const maskedOutput = document.getElementById("maskedOutput");
-
 const riskLevel = document.getElementById("riskLevel");
 const riskScore = document.getElementById("riskScore");
 const foundItems = document.getElementById("foundItems");
 
+let currentUser = null;
+let currentProfile = null;
+
 async function checkAuth() {
-  const {
-    data: { user }
-  } = await db.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
 
   if (!user) {
     window.location.href = "index.html";
+    return;
   }
+
+  currentUser = user;
+
+  const { data: profile } = await db
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  currentProfile = profile;
 }
 
 async function getRules() {
@@ -30,14 +41,12 @@ async function getRules() {
 }
 
 async function saveLog(text, result, type) {
-  const {
-    data: { user }
-  } = await db.auth.getUser();
-
-  if (!user) return;
+  if (!currentUser) return;
 
   await db.from("check_logs").insert({
-    user_id: user.id,
+    user_id: currentUser.id,
+    full_name: currentProfile?.full_name || "Не указано",
+    email: currentUser.email,
     check_type: type,
     input_text: text,
     masked_text: result.maskedText,
@@ -52,12 +61,9 @@ function renderResult(result) {
   riskScore.textContent = "Оценка: " + result.score;
   maskedOutput.value = result.maskedText;
 
-  if (!result.findings.length) {
-    foundItems.innerHTML = "<p>Угроз не обнаружено.</p>";
-    return;
-  }
-
-  foundItems.innerHTML = result.findings.map(item => `<p>• ${item}</p>`).join("");
+  foundItems.innerHTML = result.findings.length
+    ? result.findings.map(item => `<p>• ${item}</p>`).join("")
+    : "<p>Угроз не обнаружено.</p>";
 }
 
 analyzeBtn.addEventListener("click", async () => {
@@ -73,8 +79,7 @@ analyzeBtn.addEventListener("click", async () => {
 
 maskBtn.addEventListener("click", () => {
   const text = messageInput.value.trim();
-  if (!text) return;
-
+  if (!text) return alert("Введите текст.");
   maskedOutput.value = maskSensitiveData(text);
 });
 
