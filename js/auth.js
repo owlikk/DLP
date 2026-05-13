@@ -38,7 +38,17 @@ registerBtn.addEventListener("click", async () => {
       return;
     }
 
-    message.textContent = "Регистрация успешна.";
+    alert(
+  "Регистрация выполнена.\n\n" +
+  "Для завершения регистрации необходимо подтвердить адрес электронной почты.\n" +
+  "Письмо с подтверждением отправлено на вашу почту.\n\n" +
+  "После подтверждения email вы сможете войти в систему."
+);
+
+fullNameInput.value = "";
+emailInput.value = "";
+passwordInput.value = "";
+message.textContent = "";
   }
 });
 
