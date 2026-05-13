@@ -34,7 +34,7 @@ async function checkAuth() {
   currentProfile = profile;
 
   if (profile?.role === "admin") {
-    adminBtn.style.display = "flex";
+  adminBtn.hidden = false;
   }
 }
 
