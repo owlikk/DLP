@@ -2,6 +2,7 @@ const analyzeBtn = document.getElementById("analyzeBtn");
 const maskBtn = document.getElementById("maskBtn");
 const clipboardBtn = document.getElementById("clipboardBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const adminBtn = document.getElementById("adminBtn");
 
 const messageInput = document.getElementById("messageInput");
 const maskedOutput = document.getElementById("maskedOutput");
@@ -13,7 +14,9 @@ let currentUser = null;
 let currentProfile = null;
 
 async function checkAuth() {
-  const { data: { user } } = await db.auth.getUser();
+  const {
+    data: { user }
+  } = await db.auth.getUser();
 
   if (!user) {
     window.location.href = "index.html";
@@ -29,6 +32,10 @@ async function checkAuth() {
     .single();
 
   currentProfile = profile;
+
+  if (profile?.role === "admin") {
+    adminBtn.style.display = "block";
+  }
 }
 
 async function getRules() {
@@ -41,8 +48,6 @@ async function getRules() {
 }
 
 async function saveLog(text, result, type) {
-  if (!currentUser) return;
-
   await db.from("check_logs").insert({
     user_id: currentUser.id,
     full_name: currentProfile?.full_name || "Не указано",
@@ -79,7 +84,7 @@ analyzeBtn.addEventListener("click", async () => {
 
 maskBtn.addEventListener("click", () => {
   const text = messageInput.value.trim();
-  if (!text) return alert("Введите текст.");
+  if (!text) return;
   maskedOutput.value = maskSensitiveData(text);
 });
 
@@ -93,13 +98,26 @@ clipboardBtn.addEventListener("click", async () => {
 
     renderResult(result);
     await saveLog(text, result, "clipboard");
+
   } catch {
     alert("Нет доступа к буферу обмена.");
   }
 });
 
+adminBtn.addEventListener("click", () => {
+  const pin = prompt("Введите PIN-код администратора:");
+
+  if (pin === "6947") {
+    sessionStorage.setItem("admin_pin_verified", "true");
+    window.location.href = "admin.html";
+  } else {
+    alert("Неверный PIN-код.");
+  }
+});
+
 logoutBtn.addEventListener("click", async () => {
   await db.auth.signOut();
+  sessionStorage.removeItem("admin_pin_verified");
   window.location.href = "index.html";
 });
 
