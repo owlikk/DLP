@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OWL DLP — Обучение</title>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 
@@ -15,25 +15,15 @@
         <img src="assets/logo.png" class="dashboard-logo" alt="OWL DLP">
         <div>
           <h1>Обучение сотрудников</h1>
-          <p>Основы безопасной работы с электронной почтой и социальными сетями</p>
+          <p>Тест по безопасной работе с электронной почтой и социальными сетями</p>
         </div>
       </div>
 
       <div class="result-box">
-        <h3>Правила безопасности</h3>
-        <p>• Не передавайте пароли через электронную почту и социальные сети.</p>
-        <p>• Не переходите по подозрительным ссылкам.</p>
-        <p>• Проверяйте отправителя письма.</p>
-        <p>• Не публикуйте конфиденциальные данные предприятия.</p>
-      </div>
-
-      <div class="result-box" style="margin-top:20px;">
-        <h3>Мини-тест</h3>
-        <p>Можно ли отправлять пароль коллеге через Telegram?</p>
-
-        <button onclick="submitTest(false)">Да</button>
-        <button onclick="submitTest(true)">Нет</button>
-
+        <h3>Тестирование</h3>
+        <p>Система случайно выбирает 10 вопросов из 50. Вопросы не повторяются.</p>
+        <div id="quizContainer"></div>
+        <button id="finishTestBtn">Завершить тест</button>
         <p id="testResult"></p>
       </div>
 
