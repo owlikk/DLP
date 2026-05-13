@@ -26,12 +26,17 @@ registerBtn.addEventListener("click", async () => {
   }
 
   if (data.user) {
-    await db.from("profiles").insert({
+    const { error: profileError } = await db.from("profiles").insert({
       id: data.user.id,
       full_name: fullName,
       email: email,
       role: "employee"
     });
+
+    if (profileError) {
+      message.textContent = "Ошибка создания профиля.";
+      return;
+    }
 
     message.textContent = "Регистрация успешна.";
   }
@@ -47,31 +52,29 @@ loginBtn.addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await db.auth.signInWithPassword({
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("*")
+    .eq("email", email)
+    .single();
+
+  if (profileError || !profile) {
+    message.textContent = "Пользователь не найден.";
+    return;
+  }
+
+  if (profile.full_name.trim().toLowerCase() !== fullName.trim().toLowerCase()) {
+    message.textContent = "Неверное ФИО.";
+    return;
+  }
+
+  const { error } = await db.auth.signInWithPassword({
     email,
     password
   });
 
   if (error) {
-    message.textContent = "Ошибка входа: неверный email или пароль.";
-    return;
-  }
-
-  const { data: profile } = await db
-    .from("profiles")
-    .select("*")
-    .eq("id", data.user.id)
-    .single();
-
-  if (!profile) {
-    await db.auth.signOut();
-    message.textContent = "Профиль пользователя не найден.";
-    return;
-  }
-
-  if (profile.full_name.trim().toLowerCase() !== fullName.toLowerCase()) {
-    await db.auth.signOut();
-    message.textContent = "Неверное ФИО.";
+    message.textContent = "Неверный email или пароль.";
     return;
   }
 
