@@ -21,7 +21,7 @@ async function checkAdminAccess() {
   }
 
   if (sessionStorage.getItem("admin_pin_verified") !== "true") {
-    alert("Требуется подтверждение PIN.");
+    alert("Требуется подтверждение PIN-кода.");
     window.location.href = "dashboard.html";
     return;
   }
@@ -31,6 +31,8 @@ const logsContainer = document.getElementById("logsContainer");
 const testsContainer = document.getElementById("testsContainer");
 const addRuleBtn = document.getElementById("addRuleBtn");
 const ruleMessage = document.getElementById("ruleMessage");
+const ruleInput = document.getElementById("ruleInput");
+const riskWeightInput = document.getElementById("riskWeightInput");
 
 async function loadLogs() {
   const { data } = await db
@@ -38,18 +40,27 @@ async function loadLogs() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  logsContainer.innerHTML = data?.length
-    ? data.map(log => `
-      <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.18);">
-        <p><strong>Сотрудник:</strong> ${log.full_name}</p>
-        <p><strong>Email:</strong> ${log.email}</p>
-        <p><strong>Тип:</strong> ${log.check_type}</p>
-        <p><strong>Риск:</strong> ${log.risk_level}</p>
-        <p><strong>Оценка:</strong> ${log.risk_score}</p>
-        <p><strong>Дата:</strong> ${new Date(log.created_at).toLocaleString()}</p>
-      </div>
-    `).join("")
-    : "Журнал пуст.";
+  if (!data || !data.length) {
+    logsContainer.textContent = "Журнал проверок пуст.";
+    return;
+  }
+
+  logsContainer.innerHTML = data.map(log => `
+    <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.18);">
+      <p><strong>Сотрудник:</strong> ${log.full_name || "Не указано"}</p>
+      <p><strong>Email:</strong> ${log.email || "Не указано"}</p>
+      <p><strong>Тип проверки:</strong> ${log.check_type}</p>
+      <p><strong>Риск:</strong> ${log.risk_level}</p>
+      <p><strong>Оценка:</strong> ${log.risk_score}</p>
+      <p><strong>Найдено:</strong> ${(log.found_items || []).join(", ") || "Угроз не обнаружено"}</p>
+      <p><strong>Дата:</strong> ${new Date(log.created_at).toLocaleString()}</p>
+
+      <details>
+        <summary>Показать замаскированный текст</summary>
+        <p>${log.masked_text || "Нет данных"}</p>
+      </details>
+    </div>
+  `).join("");
 }
 
 async function loadTests() {
@@ -58,31 +69,52 @@ async function loadTests() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  testsContainer.innerHTML = data?.length
-    ? data.map(test => `
-      <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.18);">
-        <p><strong>Сотрудник:</strong> ${test.full_name}</p>
-        <p><strong>Email:</strong> ${test.email}</p>
-        <p><strong>Результат:</strong> ${test.score}/${test.total}</p>
-        <p><strong>Дата:</strong> ${new Date(test.created_at).toLocaleString()}</p>
-      </div>
-    `).join("")
-    : "Журнал пуст.";
+  if (!data || !data.length) {
+    testsContainer.textContent = "Журнал обучения пуст.";
+    return;
+  }
+
+  testsContainer.innerHTML = data.map(test => `
+    <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.18);">
+      <p><strong>Сотрудник:</strong> ${test.full_name || "Не указано"}</p>
+      <p><strong>Email:</strong> ${test.email || "Не указано"}</p>
+      <p><strong>Результат тестирования:</strong> ${test.score}/${test.total}</p>
+      <p><strong>Дата:</strong> ${new Date(test.created_at).toLocaleString()}</p>
+    </div>
+  `).join("");
 }
 
 addRuleBtn.addEventListener("click", async () => {
-  const value = document.getElementById("ruleInput").value.trim();
-  if (!value) return;
+  const value = ruleInput.value.trim();
+  const riskWeight = parseInt(riskWeightInput.value);
 
-  await db.from("rules").insert({
+  if (!value) {
+    ruleMessage.textContent = "Введите ключевое слово или фразу.";
+    return;
+  }
+
+  if (!riskWeight || riskWeight < 1 || riskWeight > 100) {
+    ruleMessage.textContent = "Введите корректный вес риска (1–100).";
+    return;
+  }
+
+  const { error } = await db.from("rules").insert({
     rule_name: value,
     rule_type: "keyword",
     value: value,
-    risk_weight: 20,
+    risk_weight: riskWeight,
     is_active: true
   });
 
-  ruleMessage.textContent = "Правило добавлено.";
+  if (error) {
+    ruleMessage.textContent = "Ошибка добавления правила.";
+    return;
+  }
+
+  ruleMessage.textContent = `Правило "${value}" добавлено. Вес риска: ${riskWeight}`;
+
+  ruleInput.value = "";
+  riskWeightInput.value = "";
 });
 
 (async () => {
