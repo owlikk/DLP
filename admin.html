@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OWL DLP — Админ-панель</title>
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
 
@@ -15,14 +15,42 @@
         <img src="assets/logo.png" class="dashboard-logo" alt="OWL DLP">
         <div>
           <h1>Админ-панель</h1>
-          <p>Журналы проверок, обучения и управление правилами</p>
+          <p>Управление правилами анализа, журналами проверок и обучением сотрудников</p>
         </div>
       </div>
 
       <div class="result-box">
-        <h3>Добавить запрещённое слово</h3>
-        <input type="text" id="ruleInput" placeholder="Например: договор, зарплата, база клиентов">
+        <h3>Добавление пользовательского правила</h3>
+
+        <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+          <h4 style="margin-top:0;">Рекомендуемая градация риска</h4>
+
+          <p>🟢 <strong>10–20 баллов</strong> — общие служебные данные</p>
+          <p>Примеры: отчёт, проект, документ, внутреннее письмо</p>
+
+          <p>🟡 <strong>25–40 баллов</strong> — чувствительные корпоративные данные</p>
+          <p>Примеры: договор, зарплата, база клиентов, финансовый отчёт</p>
+
+          <p>🔴 <strong>45–70 баллов</strong> — критичные данные</p>
+          <p>Примеры: пароль, токен, API key, банковская карта, ИИН, коммерческая тайна</p>
+        </div>
+
+        <input
+          type="text"
+          id="ruleInput"
+          placeholder="Введите ключевое слово или фразу"
+        >
+
+        <input
+          type="number"
+          id="riskWeightInput"
+          placeholder="Введите вес риска (например 35)"
+          min="1"
+          max="100"
+        >
+
         <button id="addRuleBtn">Добавить правило</button>
+
         <p id="ruleMessage"></p>
       </div>
 
