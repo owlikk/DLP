@@ -15,6 +15,17 @@ registerBtn.addEventListener("click", async () => {
     return;
   }
 
+  const { data: existingProfile } = await db
+  .from("profiles")
+  .select("email")
+  .eq("email", email)
+  .maybeSingle();
+
+if (existingProfile) {
+  message.textContent = "Пользователь с таким email уже зарегистрирован.";
+  return;
+}
+
   message.textContent = "Регистрация...";
 
   const { data, error } = await db.auth.signUp({
