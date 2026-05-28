@@ -187,18 +187,32 @@ async function loadEmployees() {
   employeesContainer.innerHTML = "";
 
   data.forEach(user => {
-    employeesContainer.innerHTML += `
-      <label style="display:block; margin-bottom:8px;">
-        <input
-          type="checkbox"
-          class="employeeCheckbox"
-          value="${user.id}"
-          data-name="${user.full_name}"
-          data-email="${user.email}"
-        >
-        ${user.full_name} — ${user.email}
-      </label>
-    `;
+employeesContainer.innerHTML += `
+  <label style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+    cursor:pointer;
+  ">
+    <input
+      type="checkbox"
+      class="employeeCheckbox"
+      value="${user.id}"
+      data-name="${user.full_name}"
+      data-email="${user.email}"
+      style="
+        width:18px;
+        height:18px;
+        margin:0;
+      "
+    >
+
+    <span>
+      ${user.full_name} — ${user.email}
+    </span>
+  </label>
+`;
   });
 }
 
