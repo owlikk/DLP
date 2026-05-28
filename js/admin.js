@@ -1,3 +1,5 @@
+emailjs.init("oEcdaRQJYMDUDQaUM");
+
 async function checkAdminAccess() {
   const {
     data: { user }
@@ -117,8 +119,201 @@ addRuleBtn.addEventListener("click", async () => {
   riskWeightInput.value = "";
 });
 
+const employeesContainer = document.getElementById("employeesContainer");
+const phishingTitleInput = document.getElementById("phishingTitleInput");
+const sendPhishingBtn = document.getElementById("sendPhishingBtn");
+const phishingMessage = document.getElementById("phishingMessage");
+const phishingLogsContainer = document.getElementById("phishingLogsContainer");
+
+const phishingTemplates = [
+  {
+    subject: "Срочное подтверждение аккаунта",
+    text: "Ваш корпоративный аккаунт требует срочного подтверждения."
+  },
+  {
+    subject: "Подтверждение VPN-доступа",
+    text: "Для продолжения работы подтвердите VPN-доступ."
+  },
+  {
+    subject: "Подозрительная активность",
+    text: "Обнаружена подозрительная активность в вашей учётной записи."
+  },
+  {
+    subject: "Новый документ HR",
+    text: "Ознакомьтесь с новым внутренним документом компании."
+  },
+  {
+    subject: "Обновление пароля",
+    text: "Требуется обновить пароль корпоративного аккаунта."
+  },
+  {
+    subject: "Проверка службы безопасности",
+    text: "Служба безопасности требует подтверждения данных."
+  },
+  {
+    subject: "Защищённый файл",
+    text: "Вам отправлен защищённый корпоративный файл."
+  },
+  {
+    subject: "Системное уведомление",
+    text: "Для продолжения работы подтвердите учётную запись."
+  },
+  {
+    subject: "Обновление доступа",
+    text: "Подтвердите доступ к внутренним ресурсам компании."
+  },
+  {
+    subject: "Проверка Microsoft Account",
+    text: "Требуется повторная авторизация Microsoft аккаунта."
+  }
+];
+
+async function loadEmployees() {
+  const { data, error } = await db
+    .from("profiles")
+    .select("*")
+    .eq("role", "employee");
+
+  if (error) {
+    employeesContainer.innerHTML = "Ошибка загрузки сотрудников.";
+    return;
+  }
+
+  if (!data.length) {
+    employeesContainer.innerHTML = "Сотрудники не найдены.";
+    return;
+  }
+
+  employeesContainer.innerHTML = "";
+
+  data.forEach(user => {
+    employeesContainer.innerHTML += `
+      <label style="display:block; margin-bottom:8px;">
+        <input
+          type="checkbox"
+          class="employeeCheckbox"
+          value="${user.id}"
+          data-name="${user.full_name}"
+          data-email="${user.email}"
+        >
+        ${user.full_name} — ${user.email}
+      </label>
+    `;
+  });
+}
+
+async function loadPhishingLogs() {
+  const { data, error } = await db
+    .from("phishing_tests")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    phishingLogsContainer.innerHTML = "Ошибка загрузки журнала.";
+    return;
+  }
+
+  if (!data.length) {
+    phishingLogsContainer.innerHTML = "Журнал пуст.";
+    return;
+  }
+
+  phishingLogsContainer.innerHTML = "";
+
+  data.forEach(log => {
+    phishingLogsContainer.innerHTML += `
+      <div style="
+        margin-bottom:12px;
+        padding:10px;
+        border-radius:10px;
+        background: rgba(255,255,255,0.07);
+      ">
+        <strong>${log.employee_name}</strong><br>
+        ${log.employee_email}<br>
+        Проверка: ${log.test_title}<br>
+        Переход: ${log.clicked ? "Да" : "Нет"}<br>
+      </div>
+    `;
+  });
+}
+
+sendPhishingBtn.addEventListener("click", async () => {
+
+  const selected = document.querySelectorAll(".employeeCheckbox:checked");
+
+  if (!selected.length) {
+    phishingMessage.textContent = "Выберите сотрудников.";
+    return;
+  }
+
+  const title = phishingTitleInput.value.trim();
+
+  if (!title) {
+    phishingMessage.textContent = "Введите название проверки.";
+    return;
+  }
+
+  sendPhishingBtn.disabled = true;
+
+  phishingMessage.textContent = "Отправка писем...";
+
+  for (const employee of selected) {
+
+    const employeeId = employee.value;
+    const employeeName = employee.dataset.name;
+    const employeeEmail = employee.dataset.email;
+
+    const template =
+      phishingTemplates[
+        Math.floor(Math.random() * phishingTemplates.length)
+      ];
+
+    const token = crypto.randomUUID();
+
+    const phishingLink =
+      `${window.location.origin}${window.location.pathname.replace("admin.html", "phishing.html")}?token=${token}`;
+
+    await db.from("phishing_tests").insert({
+      employee_id: employeeId,
+      employee_name: employeeName,
+      employee_email: employeeEmail,
+      test_title: title,
+      email_subject: template.subject,
+      message_text: template.text,
+      token,
+      phishing_link: phishingLink,
+      template_name: template.subject
+    });
+
+    await emailjs.send(
+      "service_yq7nqjn",
+      "template_szbbyyq",
+      {
+        employee_name: employeeName,
+        subject: template.subject,
+        message_text: template.text,
+        phishing_link: phishingLink
+      }
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  phishingMessage.textContent =
+    "Фишинговое тестирование успешно отправлено.";
+
+  setTimeout(() => {
+    sendPhishingBtn.disabled = false;
+  }, 5000);
+
+  loadPhishingLogs();
+});
+
 (async () => {
   await checkAdminAccess();
   await loadLogs();
   await loadTests();
+  await loadEmployees();
+  await loadPhishingLogs();
 })();
+
