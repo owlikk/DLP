@@ -56,6 +56,37 @@
         <p id="ruleMessage"></p>
       </div>
 
+
+      <div class="result-box" style="margin-top:20px;">
+  <h3>Фишинговое тестирование сотрудников</h3>
+
+  <p>
+    Выберите сотрудников, которым нужно отправить учебное фишинговое письмо.
+  </p>
+
+  <div id="employeesContainer">
+    Загрузка сотрудников...
+  </div>
+
+  <input
+    type="text"
+    id="phishingTitleInput"
+    placeholder="Название проверки"
+    style="margin-top:12px; margin-bottom:12px;"
+  >
+
+  <button id="sendPhishingBtn">
+    Отправить фишинговое тестирование
+  </button>
+
+  <p id="phishingMessage"></p>
+</div>
+
+<div class="result-box" style="margin-top:20px;">
+  <h3>Журнал фишингового тестирования</h3>
+  <div id="phishingLogsContainer">Загрузка...</div>
+</div>
+      
       <div class="result-box" style="margin-top:20px;">
         <h3>Журнал проверок</h3>
         <div id="logsContainer">Загрузка...</div>
