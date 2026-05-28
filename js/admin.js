@@ -303,6 +303,7 @@ sendPhishingBtn.addEventListener("click", async () => {
       "service_yq7nqjn",
       "template_szbbyyq",
       {
+        to_email: employeeEmail,
         employee_name: employeeName,
         subject: template.subject,
         message_text: template.text,
