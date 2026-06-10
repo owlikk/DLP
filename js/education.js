@@ -89,10 +89,10 @@ async function initUser() {
 
 function renderQuiz() {
   quizContainer.innerHTML = selectedQuestions.map((item, index) => `
-    <div class="result-box" style="margin-top:15px;">
+    <div class="result-box question-box" style="margin-top:15px;">
       <p><strong>${index + 1}. ${item.q}</strong></p>
       ${item.options.map(option => `
-        <label style="display:block; margin:6px 0;">
+        <label class="answer-option" style="display:block; margin:6px 0; padding:8px; border-radius:8px;">
           <input type="radio" name="q${index}" value="${option}">
           ${option}
         </label>
@@ -106,8 +106,43 @@ finishTestBtn.addEventListener("click", async () => {
 
   selectedQuestions.forEach((item, index) => {
     const selected = document.querySelector(`input[name="q${index}"]:checked`);
-    if (selected && selected.value === item.a) score++;
+    const options = document.querySelectorAll(`input[name="q${index}"]`);
+
+    options.forEach(input => {
+      const label = input.closest("label");
+
+      input.disabled = true;
+
+      if (input.value === item.a) {
+        label.style.background = "rgba(34, 197, 94, 0.25)";
+        label.style.border = "1px solid rgba(34, 197, 94, 0.8)";
+      }
+
+      if (selected && input.checked && input.value !== item.a) {
+        label.style.background = "rgba(239, 68, 68, 0.25)";
+        label.style.border = "1px solid rgba(239, 68, 68, 0.8)";
+      }
+    });
+
+    if (selected && selected.value === item.a) {
+      score++;
+    }
   });
+
+  testResult.textContent = `Ваш результат: ${score}/10`;
+
+  if (currentUser) {
+    await db.from("test_results").insert({
+      user_id: currentUser.id,
+      full_name: currentProfile?.full_name || "Не указано",
+      email: currentUser.email,
+      score: score,
+      total: 10
+    });
+  }
+
+  finishTestBtn.disabled = true;
+});
 
   testResult.textContent = `Ваш результат: ${score}/10`;
 
