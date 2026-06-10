@@ -144,20 +144,5 @@ finishTestBtn.addEventListener("click", async () => {
   finishTestBtn.disabled = true;
 });
 
-  testResult.textContent = `Ваш результат: ${score}/10`;
-
-  if (currentUser) {
-    await db.from("test_results").insert({
-      user_id: currentUser.id,
-      full_name: currentProfile?.full_name || "Не указано",
-      email: currentUser.email,
-      score: score,
-      total: 10
-    });
-  }
-
-  finishTestBtn.disabled = true;
-});
-
 initUser();
 renderQuiz();
